@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<!--
+TODO farsi numbers
+add small ticks
+more nice hands
+add numeric time written
+convert to widget
+publish on the store; installable PWA
+consistent dark color to system color
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>24-Hour Clockv2</title>
+<style>
+  :root {
+    --clock-size: 90vmin;
+    --direction: normal;
+  }
+  body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background: #222;
+    color: #fff;
+  }
+  .clock {
+    position: relative;
+    width: var(--clock-size);
+    height: var(--clock-size);
+    border: 0.5vmin solid #ddd;
+    border-radius: 50%;
+    background: linear-gradient(
+      to bottom,
+      brown 0%, brown 50%, darkblue 50%, darkblue 100%
+    );
+    box-shadow: inset 0 0 10px #444;
+    user-select: none;
+  }
+    .ticks {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+    .tick {
+  position: absolute;
+  width: 0.4vmin;
+  height: 14vmin;
+  background: #fff;
+  color: #fff;
+  left: 50%;
+  top: 50%;
+  transform-origin: 50% 0%;
+  border-radius: 0.2vmin;
+  }
+  .center-dot {
+    position: absolute;
+    width: 2vmin;
+    height: 2vmin;
+    background: #fff;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+  }
+
+  /* Hour numbers - 24 numbers */
+  .numbers {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform: translate(-2%, -2%);
+    font-size: 5vmin;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    color: #bbb;
+  }
+  .numbers span {
+    position: absolute;
+    width: 4vmin;
+    height: 4vmin;
+    text-align: center;
+    line-height: 4vmin;
+    transform-origin: 50% 50%;
+  }
+
+  /* Clock hands */
+  .hand {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    background: #fff;
+    transform-origin: bottom center;
+    border-radius: 2vmin;
+  }
+  .hand.hour {
+    width: 1.5vmin;
+    height: 36vmin;
+    background: #f0a500;
+    z-index: 5;
+  }
+  .hand.minute {
+    width: 1vmin;
+    height: 44vmin;
+    background: #fff;
+    z-index: 4;
+  }
+  .hand.second {
+    width: 0.5vmin;
+    height: 43vmin;
+    background: #e63946;
+    z-index: 3;
+  }
+</style>
+</head>
+<body>
+<div class="clock" id="clock">
+  <div class="numbers" id="numbers"></div>
+  <div class="ticks" id="ticks"></div>
+  <div class="hand hour" id="hour-hand"></div>
+  <div class="hand minute" id="minute-hand"></div>
+  <div class="hand second" id="second-hand"></div>
+  <div class="center-dot"></div>
+</div>
+
+<script>
+  // Configuration variable
+  let newType = true; // switch this true/false to test the alternate mode
+
+  // Set CSS property for rotation direction
+  document.documentElement.style.setProperty(
+    '--direction',
+    newType ? 'reverse' : 'normal'
+  );
+
+  const clock = document.getElementById('clock');
+  const hourHand = document.getElementById('hour-hand');
+  const minuteHand = document.getElementById('minute-hand');
+  const secondHand = document.getElementById('second-hand');
+  const numbersContainer = document.getElementById('numbers');
+  
+  // Clear previous numbers and generate hour numbers
+  function generateNumbers() {
+    numbersContainer.innerHTML = '';
+    // If newType = true, '6' should be at the top (0 degrees)
+    // So we offset numbers by 6 hours anticlockwise
+    // Positions around circle: 360 degrees / 24 = 15 degrees per hour
+    // If newType = false, normal clock 0 hour is top
+
+    for (let i = 0; i < 24; i++) {
+      const span = document.createElement('span');
+      let hourNumber = i;
+      // Calculate angle offset is different in newType mode
+      let angle;
+
+      if (newType) {
+        // anticlockwise, "6" at top
+        // position i=6 at 0deg, so angle = (i - 6) * 15 deg (clockwise)
+        // But anticlockwise rotation means numbers arranged clockwise visually, so normal angle placement
+        angle = -(i - 6+0.5) * 15;
+        hourNumber = (hourNumber % 12) + 1;
+      } else {
+        // normal clockwise, 0 at top
+        angle = i * 15;
+      }
+
+      // Position numbers around circle
+      // center is 50% 50%, radius is around 42% of clock size
+      const radius = 43;
+      // Convert angle to rad for sin/cos (angle in degrees)
+      const rad = (angle - 90) * (Math.PI / 180); // shift by -90 so 0deg up
+
+      const x = 50 + radius * Math.cos(rad);
+      const y = 50 + radius * Math.sin(rad);
+
+      span.style.left = `${x}%`;
+      span.style.top = `${y}%`;
+
+      // Show hour number, but when newType = true, displayed hour is 6 less mod 24
+      span.textContent = hourNumber;
+      numbersContainer.appendChild(span);
+    }
+  }
+function generateTicks() {
+  const ticksContainer = document.getElementById('ticks');
+  ticksContainer.innerHTML = '';
+  const totalTicks = 24;
+  const tickAngleStep = 360 / totalTicks;
+
+  for (let i = 0; i < totalTicks; i++) {
+    const tick = document.createElement('div');
+    tick.className = 'tick';
+    //tick.style.transform = `translateX(-50%) rotate(${i * tickAngleStep}deg)`;
+    tick.style.transform = `rotate(${i * 15}deg)  translateY(-45vmin)`;
+    ticksContainer.appendChild(tick);
+  }
+}
+
+  function updateClock() {
+    const now = new Date();
+
+    // Actual hour for normal or modified hour for newType
+    let hour = now.getHours();
+    let minute = now.getMinutes();
+    let second = now.getSeconds();
+
+    if (newType) {
+      // Display hour 6 less mod 24
+      hour = (hour - 6 + 24) % 24;
+    }
+
+    // Calculate rotations in degrees for 24-hour format:
+    // hour hand: 360 degrees / 24 hours = 15 degrees per hour + partial by minutes
+    // minute hand: 360/60 = 6 degrees per minute
+    // second hand: 360/60 = 6 degrees per second
+
+    let hourDeg = (hour + minute / 60) * 15;
+    let minuteDeg = minute * 6;
+    let secondDeg = second * 6;
+
+    // If newType, rotate anticlockwise, so negate angles.
+    if (newType) {
+      hourDeg = -hourDeg+90;
+      minuteDeg = -minuteDeg;
+      secondDeg = -secondDeg;
+    }
+
+    hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+    minuteHand.style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
+    secondHand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
+  }
+
+  generateNumbers();
+  generateTicks();
+  updateClock();
+  setInterval(updateClock, 1000);
+
+</script>
+</body>
+</html>
