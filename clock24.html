@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <!--
-TODO farsi numbers
-add small ticks
+TODO
 more nice hands
 add numeric time written
 convert to widget
@@ -15,7 +14,7 @@ consistent dark color to system color
 <title>24-Hour Clockv2</title>
 <style>
   :root {
-    --clock-size: 90vmin;
+    --clock-size: 88vmin;
     --direction: normal;
   }
   body {
@@ -57,11 +56,32 @@ consistent dark color to system color
   transform-origin: 50% 0%;
   border-radius: 0.2vmin;
   }
+  .tick.minute {
+  position: absolute;
+  width: 0.4vmin;
+  height: 1vmin;
+  background: #fff;
+  color: #fff;
+  left: 50%;
+  top: 50%;
+  transform-origin: 50% 0%;
+}
   .center-dot {
     position: absolute;
-    width: 2vmin;
-    height: 2vmin;
-    background: #fff;
+    width: 14vmin;
+    height: 14vmin;
+    background: #39b;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+  }
+  .center-dot2 {
+    position: absolute;
+    width: 0vmin;
+    height: 0vmin;
+    background: #39b;
     border-radius: 50%;
     top: 50%;
     left: 50%;
@@ -88,7 +108,25 @@ consistent dark color to system color
     line-height: 4vmin;
     transform-origin: 50% 50%;
   }
-
+.minute-numbers {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  font-size: 3vmin;
+  font-family: Arial, sans-serif;
+  color: #ccc;
+  font-weight: normal;
+  transform: translate(-2%, -2%);
+}
+.minute-numbers span {
+  position: absolute;
+  width: 2.5vmin;
+  height: 2.5vmin;
+  text-align: center;
+  line-height: 2.5vmin;
+  transform-origin: 50% 50%;
+}
   /* Clock hands */
   .hand {
     position: absolute;
@@ -100,32 +138,45 @@ consistent dark color to system color
   }
   .hand.hour {
     width: 1.5vmin;
-    height: 36vmin;
+    height: 34vmin;
     background: #f0a500;
     z-index: 5;
   }
   .hand.minute {
     width: 1vmin;
-    height: 44vmin;
+    height: 47vmin;
     background: #fff;
     z-index: 4;
   }
   .hand.second {
     width: 0.5vmin;
-    height: 43vmin;
+    height: 47vmin;
     background: #e63946;
     z-index: 3;
   }
+.sun {
+  position: absolute;
+  width: 8vmin;
+  height: 8vmin;
+  background: #f0a50099;
+  border-radius: 50%;
+  top: 5%; /* position it at the top of the hour hand */
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 8px #f0a500aa;
+}
 </style>
 </head>
 <body>
 <div class="clock" id="clock">
   <div class="numbers" id="numbers"></div>
+  <div class="minute-numbers" id="minute-numbers"></div>
   <div class="ticks" id="ticks"></div>
-  <div class="hand hour" id="hour-hand"></div>
+  <div class="hand hour" id="hour-hand"><div class="sun"></div></div>
   <div class="hand minute" id="minute-hand"></div>
   <div class="hand second" id="second-hand"></div>
   <div class="center-dot"></div>
+  <div class="center-dot2"></div>
 </div>
 
 <script>
@@ -171,7 +222,7 @@ consistent dark color to system color
 
       // Position numbers around circle
       // center is 50% 50%, radius is around 42% of clock size
-      const radius = 43;
+      const radius = 42;
       // Convert angle to rad for sin/cos (angle in degrees)
       const rad = (angle - 90) * (Math.PI / 180); // shift by -90 so 0deg up
 
@@ -184,8 +235,27 @@ consistent dark color to system color
       // Show hour number, but when newType = true, displayed hour is 6 less mod 24
       span.textContent = hourNumber;
       numbersContainer.appendChild(span);
+
+    //  function generateMinuteNumbers() {
+  const container = document.getElementById('minute-numbers');
+  container.innerHTML = '';
+  const radius2 = 54; // radius for placing numbers slightly outside the ticks
+  
+  for (let i = 0; i < 60; i += 5) { // increments of 5
+    const span = document.createElement('span');
+    const angle = i * 6; // 6 degrees per minute tick
+    const rad = (180-angle) * (Math.PI / 180);
+    const x = 50 + radius2 * Math.cos(rad);
+    const y = 50 + radius2 * Math.sin(rad);
+    span.style.left = `${x}%`;
+    span.style.top = `${y}%`;
+    span.textContent = i === 0 ? '00' : i.toString();
+    container.appendChild(span);
+  }
     }
   }
+
+
 function generateTicks() {
   const ticksContainer = document.getElementById('ticks');
   ticksContainer.innerHTML = '';
@@ -196,7 +266,15 @@ function generateTicks() {
     const tick = document.createElement('div');
     tick.className = 'tick';
     //tick.style.transform = `translateX(-50%) rotate(${i * tickAngleStep}deg)`;
-    tick.style.transform = `rotate(${i * 15}deg)  translateY(-45vmin)`;
+    tick.style.transform = `rotate(${i * 15}deg)  translateY(-44vmin)`;
+    ticksContainer.appendChild(tick);
+  }
+
+  // generate 60 minute ticks
+  for (let i = 0; i < 60; i++) {
+    const tick = document.createElement('div');
+    tick.className = 'tick minute';
+    tick.style.transform = `rotate(${i * 6}deg) translateY(-45vmin)`;
     ticksContainer.appendChild(tick);
   }
 }
@@ -226,10 +304,9 @@ function generateTicks() {
     // If newType, rotate anticlockwise, so negate angles.
     if (newType) {
       hourDeg = -hourDeg+90;
-      minuteDeg = -minuteDeg;
-      secondDeg = -secondDeg;
+      minuteDeg = -minuteDeg-90;
+      secondDeg = -secondDeg-90;
     }
-
     hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
     minuteHand.style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
     secondHand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
