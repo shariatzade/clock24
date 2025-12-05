@@ -1,0 +1,25 @@
+{
+  "name": "24-Hour Clock v2",
+  "short_name": "24h Clock",
+  "description": "A fully animated 24-hour analog clock with anticlockwise mode, minute ticks, and day/night hemisphere.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "icons": [
+    {
+      "src": "icons/128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -12,6 +12,14 @@ consistent dark color to system color
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>24-Hour Clockv2</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000" />
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
+</script>
+
 <style>
   :root {
     --clock-size: 80vmin;
@@ -23,7 +31,7 @@ consistent dark color to system color
     height: 100vh;
     justify-content: center;
     align-items: center;
-    background: #111;
+    background: #000;
     color: #ccc;
   }
   .clock {
@@ -68,8 +76,8 @@ consistent dark color to system color
 }
   .center-dot {
     position: absolute;
-    width: 7vmin;
-    height: 7vmin;
+    width: 3.5vmin;
+    height: 3.5vmin;
     background: #39b;
     border-radius: 50%;
     top: 50%;
@@ -77,17 +85,6 @@ consistent dark color to system color
     transform: translate(-50%, -50%);
     z-index: 10;
     border: 0.1vmin solid black;
-  }
-  .center-dot2 {
-    position: absolute;
-    width: 0vmin;
-    height: 0vmin;
-    background: #39b;
-    border-radius: 50%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
   }
 
   /* Hour numbers - 24 numbers */
@@ -109,7 +106,7 @@ consistent dark color to system color
     transform: translate(-50%, -50%);
   }
 .numbers.minute {
-  font-size: 4vmin;
+  font-size: 3vmin;
   color: #ccc;
   font-weight: normal;
 }
@@ -118,7 +115,7 @@ consistent dark color to system color
     position: absolute;
     bottom: 50%;
     left: 50%;
-    background: #fff;
+    background: #ddd;
     transform-origin: bottom center;
     border-radius: 2vmin;
     border: 0.1vmin solid black;
@@ -143,8 +140,8 @@ consistent dark color to system color
   }
 .sun {
   position: absolute;
-  width: 8vmin;
-  height: 8vmin;
+  width: 7vmin;
+  height: 7vmin;
   background: #f0a50099;
   border-radius: 50%;
   top: 20%; /* position it at the top of the hour hand */
@@ -163,13 +160,13 @@ consistent dark color to system color
   <div class="hand minute" id="minute-hand"></div>
   <div class="hand second" id="second-hand"></div>
   <div class="center-dot"></div>
-  <div class="center-dot2"></div>
 </div>
 
 <script>
   // Configuration variable
   newType = true; // switch this true/false to test the alternate mode
-  let classic24HourNumbers = true; // switch this true/false to test the alternate mode
+  let classic24HourNumbers = true;
+  let onlyEvenNumbers = false;
   let classicMinutePositioning = true;
   // Set CSS property for rotation direction
   document.documentElement.style.setProperty(
@@ -192,44 +189,43 @@ consistent dark color to system color
     // If newType = false, normal clock 0 hour is top
 
     for (let i = 0; i < 24; i++) {
-      const span = document.createElement('span');
-      let hourNumber = i;
-      // Calculate angle offset is different in newType mode
-      let angle;
+      if (!onlyEvenNumbers || i % 2 == 0) {
+        const span = document.createElement('span');
+        let hourNumber = i;
+        // Calculate angle offset is different in newType mode
+        let angle;
 
-      if (newType) {
-        // anticlockwise, "6" at top
-        // position i=6 at 0deg, so angle = (i - 6) * 15 deg (clockwise)
-        // But anticlockwise rotation means numbers arranged clockwise visually, so normal angle placement
-        angle = -(i - 6 + 0.5) * 15;
-      } else {
-        // normal clockwise, 0 at top
-        angle = i * 15;
+        if (newType) {
+          // anticlockwise, "6" at top
+          // position i=6 at 0deg, so angle = (i - 6) * 15 deg (clockwise)
+          // But anticlockwise rotation means numbers arranged clockwise visually, so normal angle placement
+          angle = -(i - 6 + 0.5) * 15;
+        } else {
+          // normal clockwise, 0 at top
+          angle = i * 15;
+        }
+
+        if (classic24HourNumbers) {
+          hourNumber = hourNumber + 6 - 1;
+        }
+        hourNumber = hourNumber % 12 + 1;
+
+        // Position numbers around circle
+        // center is 50% 50%, radius is around 42% of clock size
+        const radius = 44;
+        // Convert angle to rad for sin/cos (angle in degrees)
+        const rad = (angle - 90) * (Math.PI / 180); // shift by -90 so 0deg up
+
+        const x = 50 + radius * Math.cos(rad);
+        const y = 50 + radius * Math.sin(rad);
+
+        span.style.left = `${x}%`;
+        span.style.top = `${y}%`;
+
+        // Show hour number, but when newType = true, displayed hour is 6 less mod 24
+        span.textContent = hourNumber;
+        numbersContainer.appendChild(span);
       }
-
-      if (classic24HourNumbers) {
-        hourNumber = (hourNumber + 6 - 1) % 24 + 1;
-      }
-      else {
-        hourNumber = (hourNumber % 12) + 1;
-      }
-
-      // Position numbers around circle
-      // center is 50% 50%, radius is around 42% of clock size
-      const radius = 44;
-      // Convert angle to rad for sin/cos (angle in degrees)
-      const rad = (angle - 90) * (Math.PI / 180); // shift by -90 so 0deg up
-
-      const x = 50 + radius * Math.cos(rad);
-      const y = 50 + radius * Math.sin(rad);
-
-      span.style.left = `${x}%`;
-      span.style.top = `${y}%`;
-
-      // Show hour number, but when newType = true, displayed hour is 6 less mod 24
-      span.textContent = hourNumber;
-      numbersContainer.appendChild(span);
-
     //  function generateMinuteNumbers() {
   const container = document.getElementById('minute-numbers');
   container.innerHTML = '';
