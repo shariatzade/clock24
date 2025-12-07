@@ -19,7 +19,7 @@ consistent dark color to system color
     }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>24-Hour Clockv2</title>
+  <title>Analog Clock</title>
   <meta name="theme-color" content="#121212" />
 
   <style>
@@ -53,6 +53,7 @@ consistent dark color to system color
 
     .physical_obj {
       position: absolute;
+      transform: translate(-50%, -50%);
       border: 0.1vmin solid var(--objects-border-color);
       box-shadow: 2px 2px 4px var(--shadow-color);
     }
@@ -112,6 +113,7 @@ consistent dark color to system color
       transform: translate(-50%, -50%);
       text-align: center;
       line-height: 4vmin;
+      text-shadow: 2px 2px 4px var(--shadow-color);
     }
 
     .dial_number.hour {
@@ -157,6 +159,7 @@ consistent dark color to system color
       top: 20%;
       left: 50%;
       transform: translateX(-50%);
+      z-index: 7;
       width: 7vmin;
       height: 7vmin;
       border-radius: 50%;
@@ -166,17 +169,13 @@ consistent dark color to system color
     }
 
     #center-dot {
-      position: absolute;
-      transform: translate(-50%, -50%);
       top: 50%;
       left: 50%;
       z-index: 10;
       border-radius: 50%;
       width: 3.5vmin;
       height: 3.5vmin;
-      border: 0.1vmin solid var(--objects-border-color);
       background: var(--center-dot-color);
-      box-shadow: 2px 2px 4px var(--shadow-color);
     }
   </style>
 </head>
@@ -196,7 +195,7 @@ consistent dark color to system color
     </div>
     <div id="minute_hand" class="physical_obj hand minute"></div>
     <div id="second_hand" class="physical_obj hand second"></div>
-    <div id="center-dot"></div>
+    <div id="center-dot" class="physical_obj"></div>
   </div>
 
   <script>
@@ -217,7 +216,7 @@ consistent dark color to system color
     const hour_hand = document.getElementById('hour_hand');
     const minute_hand = document.getElementById('minute_hand');
     const second_hand = document.getElementById('second_hand');
-    const dialContainer = document.getElementById('dial');
+    const dial = document.getElementById('dial');
     const hour_numbers = document.getElementById('hour_numbers');
     const minute_numbers = document.getElementById('minute_numbers');
 
@@ -251,20 +250,20 @@ consistent dark color to system color
       second_hand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
     }
 
-    function drawStaticParts() {
+    function createStaticParts() {
       //generatedial
-      dialContainer.innerHTML = '';
+      dial.innerHTML = '';
       for (let i = 0; i < 24; i++) {
         const tick = document.createElement('div');
         tick.className = 'tick hour';
         tick.style.transform = `rotate(${i * 15}deg) translateY(-40.5vmin)`;
-        dialContainer.appendChild(tick);
+        dial.appendChild(tick);
       }
       for (let i = 0; i < 60; i++) {
         const tick = document.createElement('div');
         tick.className = 'tick minute';
         tick.style.transform = `rotate(${i * 6}deg) translateY(-42vmin)`;
-        dialContainer.appendChild(tick);
+        dial.appendChild(tick);
       }
 
       //generateHourNumbers
@@ -309,10 +308,10 @@ consistent dark color to system color
       }
     }
 
-    window.addEventListener('resize', drawStaticParts);
+    window.addEventListener('resize', createStaticParts);
 
     // Initialize
-    drawStaticParts();
+    createStaticParts();
     updateClock();
     setInterval(updateClock, 1000);
   </script>
