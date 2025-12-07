@@ -57,13 +57,12 @@ consistent dark color to system color
       box-shadow: 2px 2px 4px var(--shadow-color);
     }
 
-    #clock_face {
+    #analog_clock {
       position: relative;
       width: var(--clock-size);
       height: var(--clock-size);
       border: 0.5vmin solid var(--forecolor);
       border-radius: 50%;
-      user-select: none;
       background: linear-gradient(
         to bottom,
         var(--dial-color-top) 0%,
@@ -74,11 +73,10 @@ consistent dark color to system color
       box-shadow: inset 0 0 10px var(--shadow-color);
     }
 
-    #ticks {
+    #dial {
       position: absolute;
       width: 100%;
       height: 100%;
-      pointer-events: none;
     }
 
     .tick {
@@ -100,14 +98,14 @@ consistent dark color to system color
       width: 0.4vmin;
     }
 
-    .numbers {
+    .dial_number {
       position: absolute;
       width: 100%;
       height: 100%;
       color: var(--forecolor);
     }
 
-    .numbers span {
+    .dial_number span {
       position: absolute;
       width: 4vmin;
       height: 4vmin;
@@ -116,11 +114,11 @@ consistent dark color to system color
       line-height: 4vmin;
     }
 
-    .numbers.hour {
+    .dial_number.hour {
       font-size: 5vmin;
       font-weight: bold;
     }
-    .numbers.minute {
+    .dial_number.minute {
       font-size: 3vmin;
       font-weight: normal;
     }
@@ -134,20 +132,21 @@ consistent dark color to system color
     }
 
     .physical_obj.hand.hour {
-      z-index: 4;
+      z-index: 5;
       height: 33vmin;
       width: 1.5vmin;
       background: var(--hour-hand-color);
     }
 
     .physical_obj.hand.minute {
+      z-index: 4;
       height: 44vmin;
       width: 1.2vmin;
       background: var(--minute-hand-color);
     }
 
     .physical_obj.hand.second {
-      z-index: 5;
+      z-index: 6;
       height: 47vmin;
       width: 0.5vmin;
       background: var(--second-hand-color);
@@ -183,16 +182,15 @@ consistent dark color to system color
 </head>
 
 <body>
-  <!-- Configs inside data attributes on the clock div -->
-  <div id="clock_face" 
+  <div id="analog_clock" 
        data-new-type="true" 
        data-classic24-hour-numbers="true" 
        data-only-even-numbers="false" 
        data-classic-minute-positioning="true"
        data-rotation-dir="natural">
-    <div id="ticks"></div>
-    <div id="hour_numbers" class="numbers hour"></div>
-    <div id="minute_numbers" class="numbers minute"></div>
+    <div id="dial"></div>
+    <div id="hour_numbers" class="dial_number hour"></div>
+    <div id="minute_numbers" class="dial_number minute"></div>
     <div id="hour_hand" class="physical_obj hand hour">
       <div id="sun"></div>
     </div>
@@ -209,19 +207,19 @@ consistent dark color to system color
     // publish on the store; installable PWA
     // consistent dark color to system color
 
-    const clockObj = document.getElementById('clock_face');
+    const analog_clock = document.getElementById('analog_clock');
 
-    const newType = clockObj.dataset.newType === "true";
-    const classic24HourNumbers = clockObj.dataset.classic24HourNumbers === "true";
-    const onlyEvenNumbers = clockObj.dataset.onlyEvenNumbers === "true";
-    const classicMinutePositioning = clockObj.dataset.classicMinutePositioning === "true";
+    const newType = analog_clock.dataset.newType === "true";
+    const classic24HourNumbers = analog_clock.dataset.classic24HourNumbers === "true";
+    const onlyEvenNumbers = analog_clock.dataset.onlyEvenNumbers === "true";
+    const classicMinutePositioning = analog_clock.dataset.classicMinutePositioning === "true";
 
-    const hourHand = document.getElementById('hour_hand');
-    const minuteHand = document.getElementById('minute_hand');
-    const secondHand = document.getElementById('second_hand');
-    const numbersContainer = document.getElementById('hour_numbers');
-    const minuteNumbersContainer = document.getElementById('minute_numbers');
-    const ticksContainer = document.getElementById('ticks');
+    const hour_hand = document.getElementById('hour_hand');
+    const minute_hand = document.getElementById('minute_hand');
+    const second_hand = document.getElementById('second_hand');
+    const dialContainer = document.getElementById('dial');
+    const hour_numbers = document.getElementById('hour_numbers');
+    const minute_numbers = document.getElementById('minute_numbers');
 
     function updateClock() {
       const now = new Date();
@@ -248,29 +246,29 @@ consistent dark color to system color
         secondDeg += 90;
       }
 
-      hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
-      minuteHand.style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
-      secondHand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
+      hour_hand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+      minute_hand.style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
+      second_hand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
     }
 
     function drawStaticParts() {
-      //generateTicks
-            ticksContainer.innerHTML = '';
+      //generatedial
+      dialContainer.innerHTML = '';
       for (let i = 0; i < 24; i++) {
         const tick = document.createElement('div');
         tick.className = 'tick hour';
         tick.style.transform = `rotate(${i * 15}deg) translateY(-40.5vmin)`;
-        ticksContainer.appendChild(tick);
+        dialContainer.appendChild(tick);
       }
       for (let i = 0; i < 60; i++) {
         const tick = document.createElement('div');
         tick.className = 'tick minute';
         tick.style.transform = `rotate(${i * 6}deg) translateY(-42vmin)`;
-        ticksContainer.appendChild(tick);
+        dialContainer.appendChild(tick);
       }
 
       //generateHourNumbers
-            numbersContainer.innerHTML = '';
+      hour_numbers.innerHTML = '';
       for (let i = 0; i < 24; i++) {
         if (!onlyEvenNumbers || i % 2 === 0) {
           const span = document.createElement('span');
@@ -290,12 +288,12 @@ consistent dark color to system color
           span.style.left = `${x}%`;
           span.style.top = `${y}%`;
           span.textContent = hourNumber;
-          numbersContainer.appendChild(span);
+          hour_numbers.appendChild(span);
         }
       }
 
       //generateMinuteNumbers
-      minuteNumbersContainer.innerHTML = '';
+      minute_numbers.innerHTML = '';
       const radius = 59;
       for (let i = 0; i < 60; i += 5) {
         const span = document.createElement('span');
@@ -307,22 +305,16 @@ consistent dark color to system color
         span.style.left = `${x}%`;
         span.style.top = `${y}%`;
         span.textContent = i === 0 ? '0' : i.toString();
-        minuteNumbersContainer.appendChild(span);
+        minute_numbers.appendChild(span);
       }
-    }
-
-    function startClock() {
-      updateClock();
-      setInterval(updateClock, 1000);
     }
 
     window.addEventListener('resize', drawStaticParts);
 
     // Initialize
     drawStaticParts();
-    startClock();
-
+    updateClock();
+    setInterval(updateClock, 1000);
   </script>
 </body>
-
 </html>
