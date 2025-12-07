@@ -8,302 +8,321 @@ publish on the store; installable PWA
 consistent dark color to system color
 -->
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>24-Hour Clockv2</title>
-<link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#000" />
-<script>
- if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
- }
-</script>
+  <meta charset="UTF-8" />
+  <meta name="version" content="3.0" />
+  <link rel="manifest" href="manifest.json" />
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>24-Hour Clockv2</title>
+  <meta name="theme-color" content="#121212" />
 
-<style>
- :root {
-  --clock-size: 80vmin;
-  --direction: normal;
- }
- body {
-  margin: 0;
-  display: flex;
-  height: 100vh;
-  justify-content: center;
-  align-items: center;
-  background: #000;
-  color: #ccc;
- }
- .clock {
-  position: relative;
-  width: var(--clock-size);
-  height: var(--clock-size);
-  border: 0.5vmin solid #ccc;
-  border-radius: 50%;
-  background: linear-gradient(
-   to bottom,
-   brown 0%, brown 50%, darkblue 50%, darkblue 100%
-  );
-  box-shadow: inset 0 0 10px #444;
-  user-select: none;
- }
- .ticks {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
- }
- .tick {
-  position: absolute;
-  width: 0.4vmin;
-  height: 14vmin;
-  background: #ccc;
-  left: 50%;
-  top: 50%;
-  transform-origin: 50% 0%;
-  border-radius: 0.2vmin;
- }
- .tick.minute {
-  width: 0.4vmin;
-  height: 2vmin;
- }
- .center-dot {
-  position: absolute;
-  width: 3.5vmin;
-  height: 3.5vmin;
-  background: #39b;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  border: 0.1vmin solid black;
- }
- .numbers {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  font-size: 5vmin;
-  font-weight: bold;
-  font-family: Arial, sans-serif;
-  color: #bbb;
- }
- .numbers span {
-  position: absolute;
-  width: 4vmin;
-  height: 4vmin;
-  text-align: center;
-  line-height: 4vmin;
-  transform: translate(-50%, -50%);
- }
- .numbers.minute {
-  font-size: 3vmin;
-  color: #ccc;
-  font-weight: normal;
- }
- .hand {
-  position: absolute;
-  bottom: 50%;
-  left: 50%;
-  background: #ddd;
-  transform-origin: bottom center;
-  border-radius: 2vmin;
-  border: 0.1vmin solid black;
- }
- .hand.hour {
-  width: 1.5vmin;
-  height: 33vmin;
-  background: #f0a500;
-  z-index: 4;
- }
- .hand.minute {
-  width: 1.2vmin;
-  height: 44vmin;
-  background: #bfb;
-  z-index: 3;
- }
- .hand.second {
-  width: 0.5vmin;
-  height: 47vmin;
-  background: #e63946;
-  z-index: 5;
- }
- .sun {
-  position: absolute;
-  width: 7vmin;
-  height: 7vmin;
-  background: #f0a50099;
-  border-radius: 50%;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  box-shadow: 0 0 8px #f0a500aa;
- }
-</style>
+  <style>
+    :root {
+      /* Clock sizing */
+      --clock-size: 80vmin;
+
+      /* Theme colors*/
+      --background-body: #000;
+      --forecolor: #ccc;
+      --objects-border-color: black;
+      --shadow-color: #0005;
+      --dial-color-top: brown;
+      --dial-color-bottom: darkblue;
+      --hour-hand-color: #f0a500;
+      --minute-hand-color: #bfb;
+      --second-hand-color: #e63946;
+      --center-dot-color: #39b;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      height: 100vh;
+      background: var(--background-body);
+      color: var(--forecolor);
+      font-family: Arial, sans-serif;
+    }
+
+    .physical_obj {
+      position: absolute;
+      border: 0.1vmin solid var(--objects-border-color);
+      box-shadow: 2px 2px 4px var(--shadow-color);
+    }
+
+    #clock_face {
+      position: relative;
+      width: var(--clock-size);
+      height: var(--clock-size);
+      border: 0.5vmin solid var(--forecolor);
+      border-radius: 50%;
+      user-select: none;
+      background: linear-gradient(
+        to bottom,
+        var(--dial-color-top) 0%,
+        var(--dial-color-top) 50%,
+        var(--dial-color-bottom) 50%,
+        var(--dial-color-bottom) 100%
+      );
+      box-shadow: inset 0 0 10px var(--shadow-color);
+    }
+
+    #ticks {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .tick {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-origin: 50% 0%;
+      border-radius: 0.2vmin;
+      background: var(--forecolor);
+    }
+
+    .tick.hour {
+      height: 14vmin;
+      width: 0.4vmin;
+    }
+
+    .tick.minute {
+      height: 2vmin;
+      width: 0.4vmin;
+    }
+
+    .numbers {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      color: var(--forecolor);
+    }
+
+    .numbers span {
+      position: absolute;
+      width: 4vmin;
+      height: 4vmin;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      line-height: 4vmin;
+    }
+
+    .numbers.hour {
+      font-size: 5vmin;
+      font-weight: bold;
+    }
+    .numbers.minute {
+      font-size: 3vmin;
+      font-weight: normal;
+    }
+
+    .physical_obj.hand {
+      transform-origin: bottom center;
+      bottom: 50%;
+      left: 50%;
+      border-radius: 2vmin;
+      z-index: 3;
+    }
+
+    .physical_obj.hand.hour {
+      z-index: 4;
+      height: 33vmin;
+      width: 1.5vmin;
+      background: var(--hour-hand-color);
+    }
+
+    .physical_obj.hand.minute {
+      height: 44vmin;
+      width: 1.2vmin;
+      background: var(--minute-hand-color);
+    }
+
+    .physical_obj.hand.second {
+      z-index: 5;
+      height: 47vmin;
+      width: 0.5vmin;
+      background: var(--second-hand-color);
+    }
+
+    #sun {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 7vmin;
+      height: 7vmin;
+      border-radius: 50%;
+      background: var(--hour-hand-color);
+      opacity: 0.6;
+      box-shadow: 0 0 8px var(--hour-hand-color);
+    }
+
+    #center-dot {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      top: 50%;
+      left: 50%;
+      z-index: 10;
+      border-radius: 50%;
+      width: 3.5vmin;
+      height: 3.5vmin;
+      border: 0.1vmin solid var(--objects-border-color);
+      background: var(--center-dot-color);
+      box-shadow: 2px 2px 4px var(--shadow-color);
+    }
+  </style>
 </head>
+
 <body>
-<div class="clock" id="clock">
- <div class="numbers" id="numbers"></div>
- <div class="numbers minute" id="minute-numbers"></div>
- <div class="ticks" id="ticks"></div>
- <div class="hand hour" id="hour-hand"><div class="sun"></div></div>
- <div class="hand minute" id="minute-hand"></div>
- <div class="hand second" id="second-hand"></div>
- <div class="center-dot"></div>
-</div>
+  <!-- Configs inside data attributes on the clock div -->
+  <div id="clock_face" 
+       data-new-type="true" 
+       data-classic24-hour-numbers="true" 
+       data-only-even-numbers="false" 
+       data-classic-minute-positioning="true"
+       data-rotation-dir="natural">
+    <div id="ticks"></div>
+    <div id="hour_numbers" class="numbers hour"></div>
+    <div id="minute_numbers" class="numbers minute"></div>
+    <div id="hour_hand" class="physical_obj hand hour">
+      <div id="sun"></div>
+    </div>
+    <div id="minute_hand" class="physical_obj hand minute"></div>
+    <div id="second_hand" class="physical_obj hand second"></div>
+    <div id="center-dot"></div>
+  </div>
 
-<script>
- class Clock {
-  constructor(config) {
-   this.config = config;
-   this.clockEl = document.getElementById('clock');
-   this.hourHand = document.getElementById('hour-hand');
-   this.minuteHand = document.getElementById('minute-hand');
-   this.secondHand = document.getElementById('second-hand');
-   this.numbersContainer = document.getElementById('numbers');
-   this.minuteNumbersContainer = document.getElementById('minute-numbers');
-   this.ticksContainer = document.getElementById('ticks');
-   // Set CSS direction variable
-   document.documentElement.style.setProperty(
-    '--direction',
-    config.newType ? 'reverse' : 'normal'
-   );
-   this.attachResizeListener();
-   this.drawStaticParts();
-   this.startClock();
-  }
+  <script>
+    // TODO
+    // nicer hands
+    // add numeric time written
+    // convert to widget
+    // publish on the store; installable PWA
+    // consistent dark color to system color
 
-  attachResizeListener() {
-   window.addEventListener('resize', () => {
-    this.drawStaticParts();
-   });
-  }
+    const clockObj = document.getElementById('clock_face');
 
-  drawStaticParts() {
-   this.generateNumbers();
-   this.generateMinuteNumbers();
-   this.generateTicks();
-  }
+    const newType = clockObj.dataset.newType === "true";
+    const classic24HourNumbers = clockObj.dataset.classic24HourNumbers === "true";
+    const onlyEvenNumbers = clockObj.dataset.onlyEvenNumbers === "true";
+    const classicMinutePositioning = clockObj.dataset.classicMinutePositioning === "true";
 
-  generateNumbers() {
-   const { newType, onlyEvenNumbers, classic24HourNumbers } = this.config;
-   this.numbersContainer.innerHTML = '';
-   for (let i = 0; i < 24; i++) {
-    if (!onlyEvenNumbers || i % 2 === 0) {
-     const span = document.createElement('span');
-     // Calculate angle
-     let angle;
-     if (newType) {
-      angle = -(i - 6 + 0.5) * 15;
-     } else {
-      angle = i * 15;
-     }
+    const hourHand = document.getElementById('hour_hand');
+    const minuteHand = document.getElementById('minute_hand');
+    const secondHand = document.getElementById('second_hand');
+    const numbersContainer = document.getElementById('hour_numbers');
+    const minuteNumbersContainer = document.getElementById('minute_numbers');
+    const ticksContainer = document.getElementById('ticks');
 
-     // Calculate hour number shown
-     let hourNumber = i;
-     if (classic24HourNumbers) {
-      hourNumber = (hourNumber + 6 - 1) % 12 + 1;
-     } else {
-      hourNumber = hourNumber % 24;
-     }
+    function updateClock() {
+      const now = new Date();
+      let hour = now.getHours();
+      let minute = now.getMinutes();
+      let second = now.getSeconds();
 
-     const radius = 44;
-     const rad = (angle - 90) * Math.PI / 180;
-     const x = 50 + radius * Math.cos(rad);
-     const y = 50 + radius * Math.sin(rad);
-     span.style.left = `${x}%`;
-     span.style.top = `${y}%`;
-     span.textContent = hourNumber;
-     this.numbersContainer.appendChild(span);
+      if (newType) {
+        hour = (hour - 6 + 24) % 24;
+      }
+
+      let hourDeg = (hour + minute / 60) * 15;
+      let minuteDeg = minute * 6;
+      let secondDeg = second * 6;
+
+      if (newType) {
+        hourDeg = -hourDeg + 90;
+        minuteDeg = -minuteDeg - 90;
+        secondDeg = -secondDeg - 90;
+      }
+
+      if (classicMinutePositioning) {
+        minuteDeg += 90;
+        secondDeg += 90;
+      }
+
+      hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+      minuteHand.style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
+      secondHand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
     }
-   }
-  }
 
-  generateMinuteNumbers() {
-   const { classicMinutePositioning } = this.config;
-   this.minuteNumbersContainer.innerHTML = '';
-   const radius2 = 59;
-   for (let i = 0; i < 60; i += 5) {
-    const span = document.createElement('span');
-    let angle = i * 6;
-    if (classicMinutePositioning) {
-     angle -= 90;
+    function drawStaticParts() {
+      //generateTicks
+            ticksContainer.innerHTML = '';
+      for (let i = 0; i < 24; i++) {
+        const tick = document.createElement('div');
+        tick.className = 'tick hour';
+        tick.style.transform = `rotate(${i * 15}deg) translateY(-40.5vmin)`;
+        ticksContainer.appendChild(tick);
+      }
+      for (let i = 0; i < 60; i++) {
+        const tick = document.createElement('div');
+        tick.className = 'tick minute';
+        tick.style.transform = `rotate(${i * 6}deg) translateY(-42vmin)`;
+        ticksContainer.appendChild(tick);
+      }
+
+      //generateHourNumbers
+            numbersContainer.innerHTML = '';
+      for (let i = 0; i < 24; i++) {
+        if (!onlyEvenNumbers || i % 2 === 0) {
+          const span = document.createElement('span');
+          const angle = newType ? -(i - 6 + 0.5) * 15 : i * 15;
+
+          let hourNumber;
+          if (classic24HourNumbers) {
+            hourNumber = ((i + 6 - 1) % 12) + 1;
+          } else {
+            hourNumber = i % 24;
+          }
+
+          const radius = 44;
+          const rad = (angle - 90) * Math.PI / 180;
+          const x = 50 + radius * Math.cos(rad);
+          const y = 50 + radius * Math.sin(rad);
+          span.style.left = `${x}%`;
+          span.style.top = `${y}%`;
+          span.textContent = hourNumber;
+          numbersContainer.appendChild(span);
+        }
+      }
+
+      //generateMinuteNumbers
+      minuteNumbersContainer.innerHTML = '';
+      const radius = 59;
+      for (let i = 0; i < 60; i += 5) {
+        const span = document.createElement('span');
+        let angle = i * 6;
+        if (classicMinutePositioning) angle -= 90;
+        const rad = (180 - angle) * Math.PI / 180;
+        const x = 50 + radius * Math.cos(rad);
+        const y = 50 + radius * Math.sin(rad);
+        span.style.left = `${x}%`;
+        span.style.top = `${y}%`;
+        span.textContent = i === 0 ? '0' : i.toString();
+        minuteNumbersContainer.appendChild(span);
+      }
     }
-    const rad = (180 - angle) * Math.PI / 180;
-    const x = 50 + radius2 * Math.cos(rad);
-    const y = 50 + radius2 * Math.sin(rad);
-    span.style.left = `${x}%`;
-    span.style.top = `${y}%`;
-    span.textContent = i === 0 ? '0' : i.toString();
-    this.minuteNumbersContainer.appendChild(span);
-   }
-  }
 
-  generateTicks() {
-   this.ticksContainer.innerHTML = '';
-   const totalTicks = 24;
-   for (let i = 0; i < totalTicks; i++) {
-    const tick = document.createElement('div');
-    tick.className = 'tick';
-    tick.style.transform = `rotate(${i * 15}deg) translateY(-40.5vmin)`;
-    this.ticksContainer.appendChild(tick);
-   }
-   for (let i = 0; i < 60; i++) {
-    const tick = document.createElement('div');
-    tick.className = 'tick minute';
-    tick.style.transform = `rotate(${i * 6}deg) translateY(-42vmin)`;
-    this.ticksContainer.appendChild(tick);
-   }
-  }
+    function startClock() {
+      updateClock();
+      setInterval(updateClock, 1000);
+    }
 
-  updateClock() {
-   const now = new Date();
-   let hour = now.getHours();
-   let minute = now.getMinutes();
-   let second = now.getSeconds();
-   const { newType, classicMinutePositioning } = this.config;
+    window.addEventListener('resize', drawStaticParts);
 
-   if (newType) {
-    hour = (hour - 6 + 24) % 24;
-   }
+    // Initialize
+    drawStaticParts();
+    startClock();
 
-   let hourDeg = (hour + minute / 60) * 15;
-   let minuteDeg = minute * 6;
-   let secondDeg = second * 6;
-
-   if (newType) {
-    hourDeg = -hourDeg + 90;
-    minuteDeg = -minuteDeg - 90;
-    secondDeg = -secondDeg - 90;
-   }
-
-   if (classicMinutePositioning) {
-    minuteDeg += 90;
-    secondDeg += 90;
-   }
-
-   this.hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
-   this.minuteHand.style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
-   this.secondHand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
-  }
-
-  startClock() {
-   this.updateClock();
-   setInterval(() => this.updateClock(), 1000);
-  }
- }
-
- // Configuration
- const clockConfig = {
-  newType: true,
-  classic24HourNumbers: true,
-  onlyEvenNumbers: false,
-  classicMinutePositioning: true,
- };
-
- // Initialize clock
- const clock = new Clock(clockConfig);
-
-</script>
+  </script>
 </body>
+
 </html>
