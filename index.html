@@ -58,7 +58,7 @@ consistent dark color to system color
       box-shadow: 2px 2px 4px var(--shadow-color);
     }
 
-    #analog_clock {
+    .analog_clock {
       position: relative;
       width: var(--clock-size);
       height: var(--clock-size);
@@ -74,7 +74,7 @@ consistent dark color to system color
       box-shadow: inset 0 0 10px var(--shadow-color);
     }
 
-    #dial {
+    .dial {
       position: absolute;
       width: 100%;
       height: 100%;
@@ -154,7 +154,7 @@ consistent dark color to system color
       background: var(--second-hand-color);
     }
 
-    #sun {
+    .sun {
       position: absolute;
       top: 20%;
       left: 50%;
@@ -168,7 +168,7 @@ consistent dark color to system color
       box-shadow: 0 0 8px var(--hour-hand-color);
     }
 
-    #center-dot {
+    .center-dot {
       top: 50%;
       left: 50%;
       z-index: 10;
@@ -181,21 +181,21 @@ consistent dark color to system color
 </head>
 
 <body>
-  <div id="analog_clock" 
+  <div class="analog_clock" 
        data-new-type="true" 
        data-classic24-hour-numbers="true" 
        data-only-even-numbers="false" 
        data-classic-minute-positioning="true"
        data-rotation-dir="natural">
-    <div id="dial"></div>
-    <div id="hour_numbers" class="dial_number hour"></div>
-    <div id="minute_numbers" class="dial_number minute"></div>
-    <div id="hour_hand" class="physical_obj hand hour">
-      <div id="sun"></div>
+    <div class="dial"></div>
+    <div alt="hour_numbers" class="dial_number hour"></div>
+    <div alt="minute_numbers" class="dial_number minute"></div>
+    <div alt="hour_hand" class="physical_obj hand hour">
+      <div class="sun"></div>
     </div>
-    <div id="minute_hand" class="physical_obj hand minute"></div>
-    <div id="second_hand" class="physical_obj hand second"></div>
-    <div id="center-dot" class="physical_obj"></div>
+    <div alt="minute_hand" class="physical_obj hand minute"></div>
+    <div alt="second_hand" class="physical_obj hand second"></div>
+    <div class="physical_obj center-dot"></div>
   </div>
 
   <script>
@@ -206,22 +206,16 @@ consistent dark color to system color
     // publish on the store; installable PWA
     // consistent dark color to system color
 
-    const analog_clock = document.getElementById('analog_clock');
+    function motorRotate(clock) {
+      const hour_hand = clock.querySelector('.hand.hour');
+      const minute_hand = clock.querySelector('.hand.minute');
+      const second_hand = clock.querySelector('.hand.second');
 
-    const newType = analog_clock.dataset.newType === "true";
-    const classic24HourNumbers = analog_clock.dataset.classic24HourNumbers === "true";
-    const onlyEvenNumbers = analog_clock.dataset.onlyEvenNumbers === "true";
-    const classicMinutePositioning = analog_clock.dataset.classicMinutePositioning === "true";
+      const timezone = clock.dataset.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const now = new Date(new Date().toLocaleString("en-US", {timeZone: timezone}));
+      const newType = clock.dataset.newType === "true";
+      const classicMinutePositioning = clock.dataset.classicMinutePositioning === "true";
 
-    const hour_hand = document.getElementById('hour_hand');
-    const minute_hand = document.getElementById('minute_hand');
-    const second_hand = document.getElementById('second_hand');
-    const dial = document.getElementById('dial');
-    const hour_numbers = document.getElementById('hour_numbers');
-    const minute_numbers = document.getElementById('minute_numbers');
-
-    function updateClock() {
-      const now = new Date();
       let hour = now.getHours();
       let minute = now.getMinutes();
       let second = now.getSeconds();
@@ -250,7 +244,15 @@ consistent dark color to system color
       second_hand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
     }
 
-    function createStaticParts() {
+    function staticPartsCreate(clock) {
+      const dial = clock.querySelector('.dial');
+      const hour_numbers = clock.querySelector('.dial_number.hour');
+      const minute_numbers = clock.querySelector('.dial_number.minute');
+      const onlyEvenNumbers = clock.dataset.onlyEvenNumbers === "true";
+      const newType = clock.dataset.newType === "true";
+      const classic24HourNumbers = clock.dataset.classic24HourNumbers === "true";
+      const classicMinutePositioning = clock.dataset.classicMinutePositioning === "true";
+
       //generatedial
       dial.innerHTML = '';
       for (let i = 0; i < 24; i++) {
@@ -308,12 +310,24 @@ consistent dark color to system color
       }
     }
 
-    window.addEventListener('resize', createStaticParts);
+    window.addEventListener('resize', staticPartsCreate);
 
     // Initialize
-    createStaticParts();
-    updateClock();
-    setInterval(updateClock, 1000);
+    // Initialize all clocks
+    document.querySelectorAll('.analog_clock').forEach(clock => {
+      staticPartsCreate(clock);
+      motorRotate(clock);
+    });
+
+    // Update all clocks every second
+    setInterval(() => {
+      document.querySelectorAll('.analog_clock').forEach(motorRotate);
+    }, 1000);
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('.analog_clock').forEach(staticPartsCreate);
+    });
   </script>
 </body>
 </html>
