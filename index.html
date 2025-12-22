@@ -310,7 +310,8 @@ consistent dark color to system color
       // Get current timezone offset in hours (including DST)
       const timezoneOffset = -now.getTimezoneOffset() / 60;
       // Calculate rotation: GMT+0 = 0°, GMT+12 = 180°, GMT-12 = -180°
-      const rotation = (timezoneOffset / 24) * 360 - .5/24*360;
+      let hour = now.getHours() + now.getMinutes() / 60;
+      const rotation = (timezoneOffset - hour) / 24 * 360;
       return rotation;
     }
 
