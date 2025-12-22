@@ -33,7 +33,7 @@ consistent dark color to system color
       --hour-hand-color: #f0a500;
       --minute-hand-color: #bfb;
       --second-hand-color: #e63946;
-      --center-dot-color: #39b;
+      --center_dot-color: #39b;
     }
 
     body {
@@ -49,7 +49,6 @@ consistent dark color to system color
 
     .physical_obj {
       position: absolute;
-      transform: translate(-50%, -50%);
       border: 0.1vmin solid var(--objects-border-color);
       box-shadow: 2px 2px 4px var(--shadow-color);
     }
@@ -68,12 +67,41 @@ consistent dark color to system color
         var(--dial-color-bottom) 100%
       );
       box-shadow: inset 0 0 10px var(--shadow-color);
+      cursor: pointer;
+    }
+
+    .analog_clock.map-mode {
+      background: #222;
     }
 
     .dial {
       position: absolute;
       width: 100%;
       height: 100%;
+    }
+
+    .world-map {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: -0%;
+      left: -0%;
+      background-image: url('north_pole.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+    }
+
+    .analog_clock.map-mode .world-map {
+      opacity: 0.8;
+    }
+
+    .analog_clock.map-mode .dial,
+    .analog_clock.map-mode .dial_number {
+      opacity: 0.3;
     }
 
     .tick {
@@ -103,6 +131,7 @@ consistent dark color to system color
       width: 100%;
       height: 100%;
       color: var(--forecolor);
+      transition: opacity 0.5s ease;
     }
 
     .dial_number span {
@@ -131,11 +160,13 @@ consistent dark color to system color
     }
 
     .physical_obj.hand {
-      transform-origin: bottom center;
-      bottom: 50%;
+      position: absolute;
+      top: 50%;
       left: 50%;
+      transform-origin: 50% 100%;
       border-radius: 2vmin;
       z-index: 3;
+      transform: translate(-50%, -100%);
     }
 
     .physical_obj.hand.hour {
@@ -173,14 +204,16 @@ consistent dark color to system color
       box-shadow: 0 0 8px var(--hour-hand-color);
     }
 
-    .center-dot {
+    .center_dot {
+      position: absolute;
       top: 50%;
       left: 50%;
+      transform: translate(-50%, -50%);
       z-index: 10;
       border-radius: 50%;
       width: 3.5vmin;
       height: 3.5vmin;
-      background: var(--center-dot-color);
+      background: var(--center_dot-color);
     }
   </style>
 </head>
@@ -191,21 +224,25 @@ consistent dark color to system color
        data-classic24-hour-numbers="true" 
        data-only-even-numbers="false" 
        data-classic-minute-positioning="true"
-       data-rotation-dir="natural">
-    <div class="dial"></div>
+       data-rotation-dir="natural"
+       data-view-mode="clock">
 
+    <div class="dial"></div>
+    <div class="world-map"></div>
     <div alt="hour_numbers" class="dial_number hour"></div>
     <div alt="minute_numbers" class="dial_number minute"></div>
+
     <div alt="hour_hand" class="physical_obj hand hour">
       <div class="sun"></div>
     </div>
     <div alt="minute_hand" class="physical_obj hand minute"></div>
     <div alt="second_hand" class="physical_obj hand second"></div>
-    <div class="physical_obj center-dot"></div>
+
+    <div class="physical_obj center_dot"></div>
   </div>
 
   <script>
-    function createStaticParts(clock) {
+    function createDialTicksAndNumbers(clock) {
       const dial = clock.querySelector('.dial');
       const hourNumbers = clock.querySelector('.dial_number.hour');
       const minuteNumbers = clock.querySelector('.dial_number.minute');
@@ -268,6 +305,21 @@ consistent dark color to system color
       }
     }
 
+    function calculateTimezoneRotation() {
+      const now = new Date();
+      // Get current timezone offset in hours (including DST)
+      const timezoneOffset = -now.getTimezoneOffset() / 60;
+      // Calculate rotation: GMT+0 = 0°, GMT+12 = 180°, GMT-12 = -180°
+      const rotation = (timezoneOffset / 24) * 360 - .5/24*360;
+      return rotation;
+    }
+
+    function updateWorldMapRotation(clock) {
+      const worldMap = clock.querySelector('.world-map');
+      const rotation = calculateTimezoneRotation();
+      worldMap.style.transform = `rotate(${rotation}deg)`;
+    }
+
     function motorRotate(clock) {
       const hourHand = clock.querySelector('.hand.hour');
       const minuteHand = clock.querySelector('.hand.minute');
@@ -301,15 +353,39 @@ consistent dark color to system color
         secondDeg += 90;
       }
 
-      hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
-      minuteHand.style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
-      secondHand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
+      hourHand.style.transform = `translate(-50%, -100%) rotate(${hourDeg}deg)`;
+      minuteHand.style.transform = `translate(-50%, -100%) rotate(${minuteDeg}deg)`;
+      secondHand.style.transform = `translate(-50%, -100%) rotate(${secondDeg}deg)`;
+
+      // Update world map rotation if in map mode
+      if (clock.dataset.viewMode === 'map') {
+        updateWorldMapRotation(clock);
+      }
+    }
+
+    function toggleViewMode(clock) {
+      const currentMode = clock.dataset.viewMode;
+      const newMode = currentMode === 'clock' ? 'map' : 'clock';
+      
+      clock.dataset.viewMode = newMode;
+      
+      if (newMode === 'map') {
+        clock.classList.add('map-mode');
+        updateWorldMapRotation(clock);
+      } else {
+        clock.classList.remove('map-mode');
+      }
     }
 
     // Initialize once on load
     document.querySelectorAll('.analog_clock').forEach(clock => {
-      createStaticParts(clock);
+      createDialTicksAndNumbers(clock);
       motorRotate(clock);
+      
+      // Add click event listener
+      clock.addEventListener('click', () => {
+        toggleViewMode(clock);
+      });
     });
 
     // Update hands only every second
