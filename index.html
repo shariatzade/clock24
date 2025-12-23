@@ -104,6 +104,22 @@ consistent dark color to system color
       opacity: 0.6;
     }
 
+    .earth-shadow {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: -0%;
+      left: -0%;
+      background-image: url('earth_shadow.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0;
+    }
+    .analog_clock.map-mode .earth-shadow {
+      opacity: 30%;
+    }
+
     .tick {
       position: absolute;
       left: 50%;
@@ -172,8 +188,9 @@ consistent dark color to system color
     .physical_obj.hand.hour {
       z-index: 5;
       height: 33vmin;
-      width: 1.5vmin;
-      background: var(--hour-hand-color);
+      width: 2.2vmin;
+      border: 0.5vmin solid var(--hour-hand-color);
+      background: transparent;
     }
 
     .physical_obj.hand.minute {
@@ -204,6 +221,10 @@ consistent dark color to system color
       box-shadow: 0 0 8px var(--hour-hand-color);
     }
 
+    .analog_clock.map-mode .sun {
+      opacity: 0;
+    }
+
     .center_dot {
       position: absolute;
       top: 50%;
@@ -229,6 +250,7 @@ consistent dark color to system color
 
     <div class="dial"></div>
     <div class="world-map"></div>
+    <div class='earth-shadow'></div>
     <div alt="hour_numbers" class="dial_number hour"></div>
     <div alt="minute_numbers" class="dial_number minute"></div>
 
