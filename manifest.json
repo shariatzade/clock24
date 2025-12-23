@@ -1,7 +1,7 @@
 {
   "name": "24-Hour Clock v2",
   "short_name": "24h Clock",
-  "description": "A fully animated 24-hour analog clock with anticlockwise mode, minute ticks, and day/night hemisphere.",
+  "description": "An analog clock that is a digital shadow of the earth (anticlockwise, 24-hour)",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
