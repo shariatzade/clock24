@@ -3,10 +3,11 @@
 <head>
 <!--
 TODO
-nicer hands
+hour hand width be 1 hour, with sharp head
+add midday, sunshine, sunset, midnight written in inner circle
+add settings: user can choose language; user can choose nonworking-day(s); user can define a number of alarms for daily routine on working and nonworking days.
 add numeric time written
 convert to widget
-publish on the store; installable PWA
 consistent dark color to system color
 -->
   <meta charset="UTF-8" />
@@ -187,8 +188,8 @@ consistent dark color to system color
 
     .physical_obj.hand.hour {
       z-index: 5;
-      width: 11vmin;
-      height: 33vmin;
+      width: 18vmin;
+      height: 34vmin;
       opacity: 99%;
       box-shadow: 0 0 0 #ffff;
       border:0;
@@ -206,11 +207,11 @@ consistent dark color to system color
     .hour-hand-shape.shadow{
       transform: translate(2vmin, 2vmin);
       stroke: #1113;
-      stroke-width: 4vmin;
+      stroke-width: 3.5vmin;
     }
     .hour-hand-shape.border{
       stroke: black;
-      stroke-width: 3vmin;
+      stroke-width: 2.5vmin;
     }
 
     .physical_obj.hand.minute {
@@ -274,7 +275,7 @@ consistent dark color to system color
     <div alt="hour_numbers" class="dial_number hour"></div>
     <div alt="minute_numbers" class="dial_number minute"></div>
 
-<svg alt="hour_hand" class="physical_obj hand hour" viewBox="0 0 42 320">
+<svg alt="hour_hand" class="physical_obj hand hour" viewBox="0 -20 72 320">
   <defs>
     <filter id="glow">
       <feGaussianBlur stdDeviation="2" result="blur"/>
@@ -284,10 +285,10 @@ consistent dark color to system color
       </feMerge>
     </filter>
   </defs>
-  <polygon class="hour-hand-shape shadow" points="20,320 40,59 20,2 0,59 20,320" />
-  <polygon class="hour-hand-shape border" points="20,320 40,59 20,2 0,59 20,320"/>  
-  <polygon class="hour-hand-shape" points="20,320 40,59 20,2 20,55 20,2 0,59 20,320" stroke="var(--hour-hand-color)"/>
-  <circle class="sun" cx="40" cy="100" r="27" fill="var(--hour-hand-color)" 
+  <polygon class="hour-hand-shape shadow" points="34,320 68,39 34,0 0,39 34,320" />
+  <polygon class="hour-hand-shape border" points="34,320 68,39 34,0 0,39 34,320"/>  
+  <polygon class="hour-hand-shape" points="34,330 68,39 34,0 34,60 34,-20 34,0 0,39 34,320" stroke="var(--hour-hand-color)"/>
+  <circle class="sun" cx="72" cy="100" r="27" fill="var(--hour-hand-color)" 
           filter="url(#glow)" opacity="0.6"/>
 </svg>
     <div alt="minute_hand" class="physical_obj hand minute"></div>
@@ -433,6 +434,13 @@ consistent dark color to system color
       }
     }
 
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data.type === 'UPDATE_AVAILABLE') {
+        alert(event.data.message); // or show toast
+        // Optionally reload: window.location.reload();
+      }
+    });
+    
     // Initialize once on load
     document.querySelectorAll('.analog_clock').forEach(clock => {
       createDialTicksAndNumbers(clock);
