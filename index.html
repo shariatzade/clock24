@@ -3,7 +3,6 @@
 <head>
 <!--
 TODO
-hour hand width be 1 hour, with sharp head
 add midday, sunshine, sunset, midnight written in inner circle
 add settings: user can choose language; user can choose nonworking-day(s); user can define a number of alarms for daily routine on working and nonworking days.
 add numeric time written
@@ -54,10 +53,16 @@ consistent dark color to system color
       box-shadow: 1px 1px 2px var(--shadow-color);
     }
 
-    .analog_clock {
+    .clock24 {
       position: relative;
       width: var(--clock-size);
       height: var(--clock-size);
+    }
+
+   .dial {
+      position: absolute;
+      width: 100%;
+      height: 100%;
       border: 0.5vmin solid var(--forecolor);
       border-radius: 50%;
       background: linear-gradient(
@@ -68,14 +73,14 @@ consistent dark color to system color
         var(--dial-color-bottom) 100%
       );
       box-shadow: inset 0 0 10px var(--shadow-color);
-      cursor: pointer;
     }
 
-    .analog_clock.map-mode {
+
+    .dial.map-mode {
       background: #222;
     }
 
-    .dial {
+    .dial_ticks {
       position: absolute;
       width: 100%;
       height: 100%;
@@ -96,12 +101,12 @@ consistent dark color to system color
       pointer-events: none;
     }
 
-    .analog_clock.map-mode .world-map {
+    .clock24.map-mode .world-map {
       opacity: 0.8;
     }
 
-    .analog_clock.map-mode .dial,
-    .analog_clock.map-mode .dial_number {
+    .clock24.map-mode .dial_ticks,
+    .clock24.map-mode .dial_number {
       opacity: 0.55;
     }
 
@@ -117,7 +122,7 @@ consistent dark color to system color
       background-position: center;
       opacity: 0;
     }
-    .analog_clock.map-mode .earth-shadow {
+    .clock24.map-mode .earth-shadow {
       opacity: 30%;
     }
 
@@ -242,7 +247,7 @@ consistent dark color to system color
       box-shadow: 0 0 8px var(--hour-hand-color);
     }
 
-    .analog_clock.map-mode .sun {
+    .clock24.map-mode .sun {
       opacity: 0;
     }
 
@@ -257,49 +262,61 @@ consistent dark color to system color
       height: 3.5vmin;
       background: var(--center_dot-color);
     }
+
+    #digital_clock {
+      display:flex;
+      padding: 15vmin;
+      gap: 10vmin;
+      min-width: 30vmin;
+      color: #fbfbfb;
+      font-family: Arial, sans-serif;
+      font-size: 20pt;
+    }
   </style>
 </head>
 
 <body>
-  <div class="analog_clock" 
+  <div class="clock24" 
        data-new-type="true" 
        data-classic24-hour-numbers="true" 
        data-only-even-numbers="false" 
        data-classic-minute-positioning="true"
        data-rotation-dir="natural"
        data-view-mode="clock">
+    <div class="dial"></div>
 
     <div class="world-map"></div>
-    <div class="dial"></div>
+    <div class="dial_ticks"></div>
     <div class='earth-shadow'></div>
     <div alt="hour_numbers" class="dial_number hour"></div>
     <div alt="minute_numbers" class="dial_number minute"></div>
 
-<svg alt="hour_hand" class="physical_obj hand hour" viewBox="0 -20 72 320">
-  <defs>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="2" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-  </defs>
-  <polygon class="hour-hand-shape shadow" points="34,320 68,39 34,0 0,39 34,320" />
-  <polygon class="hour-hand-shape border" points="34,320 68,39 34,0 0,39 34,320"/>  
-  <polygon class="hour-hand-shape" points="34,330 68,39 34,0 34,60 34,-20 34,0 0,39 34,320" stroke="var(--hour-hand-color)"/>
-  <circle class="sun" cx="72" cy="100" r="27" fill="var(--hour-hand-color)" 
-          filter="url(#glow)" opacity="0.6"/>
-</svg>
+    <svg alt="hour_hand" class="physical_obj hand hour" viewBox="0 -20 72 320">
+      <defs>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <polygon class="hour-hand-shape shadow" points="34,320 68,39 34,0 0,39 34,320" />
+      <polygon class="hour-hand-shape border" points="34,320 68,39 34,0 0,39 34,320"/>  
+      <polygon class="hour-hand-shape" points="34,330 68,39 34,0 34,60 34,-20 34,0 0,39 34,320" stroke="var(--hour-hand-color)"/>
+      <circle class="sun" cx="72" cy="100" r="27" fill="var(--hour-hand-color)" 
+              filter="url(#glow)" opacity="0.6"/>
+    </svg>
     <div alt="minute_hand" class="physical_obj hand minute"></div>
     <div alt="second_hand" class="physical_obj hand second"></div>
 
     <div class="physical_obj center_dot"></div>
   </div>
+    <div id='digital_clock'>--:--:--</div>
 
   <script>
     function createDialTicksAndNumbers(clock) {
-      const dial = clock.querySelector('.dial');
+      const dial_ticks = clock.querySelector('.dial_ticks');
       const hourNumbers = clock.querySelector('.dial_number.hour');
       const minuteNumbers = clock.querySelector('.dial_number.minute');
       
@@ -309,18 +326,18 @@ consistent dark color to system color
       const classicMinutePositioning = clock.dataset.classicMinutePositioning === "true";
 
       // Create ticks once using CSS custom properties
-      dial.innerHTML = '';
+      dial_ticks.innerHTML = '';
       for (let i = 0; i < 24; i++) {
         const tick = document.createElement('div');
         tick.className = 'tick hour';
         tick.style.setProperty('--tick-angle', `${i * 360/24}deg`);
-        dial.appendChild(tick);
+        dial_ticks.appendChild(tick);
       }
       for (let i = 0; i < 60; i++) {
         const tick = document.createElement('div');
         tick.className = 'tick minute';
         tick.style.setProperty('--tick-angle', `${i * 360/60}deg`);
-        dial.appendChild(tick);
+        dial_ticks.appendChild(tick);
       }
 
       // Create hour numbers once
@@ -391,6 +408,8 @@ consistent dark color to system color
       let minute = now.getMinutes();
       let second = now.getSeconds();
 
+      document.querySelector('#digital_clock').innerHTML = `${hour}:${minute}:${second}`;
+
       if (newType) {
         hour = (hour - 6 + 24) % 24;
       }
@@ -442,7 +461,7 @@ consistent dark color to system color
     });
     
     // Initialize once on load
-    document.querySelectorAll('.analog_clock').forEach(clock => {
+    document.querySelectorAll('.clock24').forEach(clock => {
       createDialTicksAndNumbers(clock);
       motorRotate(clock);
       
@@ -454,7 +473,7 @@ consistent dark color to system color
 
     // Update hands only every second
     setInterval(() => {
-      document.querySelectorAll('.analog_clock').forEach(motorRotate);
+      document.querySelectorAll('.clock24').forEach(motorRotate);
     }, 1000);
   </script>
 </body>
