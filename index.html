@@ -265,12 +265,22 @@ consistent dark color to system color
 
     #digital_clock {
       display:flex;
-      padding: 15vmin;
+      position: absolute;
       gap: 10vmin;
       min-width: 30vmin;
       color: #fbfbfb;
       font-family: Arial, sans-serif;
       font-size: 20pt;
+    }
+    @media (orientation: landscape) {
+    #digital_clock {
+        right: 3vmin;
+    }
+    }
+    @media (orientation: portrait) {
+    #digital_clock {
+      bottom: 3vmin;
+    }
     }
   </style>
 </head>
