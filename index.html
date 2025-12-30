@@ -270,16 +270,20 @@ consistent dark color to system color
       min-width: 30vmin;
       color: #fbfbfb;
       font-family: Arial, sans-serif;
-      font-size: 20pt;
+      font-size: 10vmin;
     }
     @media (orientation: landscape) {
     #digital_clock {
-        right: 3vmin;
+      right: 3vmin;
+      top: 50%;
+      transform: translateY(-50%);
     }
     }
     @media (orientation: portrait) {
     #digital_clock {
       bottom: 3vmin;
+      left: 50%;
+      transform: translateX(-50%);
     }
     }
   </style>
@@ -418,7 +422,7 @@ consistent dark color to system color
       let minute = now.getMinutes();
       let second = now.getSeconds();
 
-      document.querySelector('#digital_clock').innerHTML = `${hour}:${minute}:${second}`;
+      document.querySelector('#digital_clock').innerHTML = `${(hour - 1) % 12 + 1}:${minute}:${second}`;
 
       if (newType) {
         hour = (hour - 6 + 24) % 24;
